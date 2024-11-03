@@ -472,7 +472,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         InkWell(
                           onTap: () {
                             context.pushNamed(
-                              'view_pending_approval_recipe_page',
+                              'pending_approval_recipe_page',
                             );
                           },
                           child: Card(

@@ -124,6 +124,7 @@ class RecipeRepository {
     }
   }
 
+  // Pending Approval Page
   Future<List<Map<String, dynamic>>> getRecipesWithUsernames() async {
     List<Map<String, dynamic>> recipesWithUsernames = [];
 
@@ -217,6 +218,47 @@ class RecipeRepository {
       print("Error fetching recipes with usernames: $e");
     }
     return approvedRecipesWithUsernames;
+  }
+
+  // Function To Retrieve User's Uploaded Recipe Based on Status Parameter
+  Future<List<Map<String, dynamic>>> getRecipesByUsernameNStatus(
+      int status, Map<String, dynamic>? userData) async {
+    List<Map<String, dynamic>> allRecipesByUsernameNStatus = [];
+    try {
+      // Check if userData and email are provided
+      if (userData != null && userData.containsKey('email')) {
+        String userEmail = userData['email'];
+
+        // Fetch recipes with specified status and matching uploadedBy email
+        QuerySnapshot recipeSnapshot = await _firestore
+            .collection('recipes')
+            .where('status', isEqualTo: status)
+            .where('uploadedBy', isEqualTo: userEmail)
+            .get();
+
+        for (var recipeDoc in recipeSnapshot.docs) {
+          Recipe recipe = Recipe.fromFirestore(recipeDoc);
+
+          String username = userData['username'] ?? 'Unknown';
+
+          allRecipesByUsernameNStatus.add({
+            'id': recipeDoc.id,
+            'recipeTitle': recipe.recipeTitle,
+            'description': recipe.description,
+            'ingredients': recipe.ingredients,
+            'instructions': recipe.instructions,
+            'cookingTime': recipe.cookingTime,
+            'difficulty': recipe.difficulty,
+            'videoTutorialLink': recipe.videoTutorialLink,
+            'image': recipe.image,
+            'username': username,
+          });
+        }
+      }
+    } catch (e) {
+      print("Error fetching recipes with usernames: $e");
+    }
+    return allRecipesByUsernameNStatus;
   }
 
   Future<String?> updateRecipeStatus(String recipeId, int status) async {
