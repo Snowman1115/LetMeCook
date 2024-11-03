@@ -251,6 +251,7 @@ class RecipeRepository {
             'difficulty': recipe.difficulty,
             'videoTutorialLink': recipe.videoTutorialLink,
             'image': recipe.image,
+            'status': recipe.status,
             'username': username,
           });
         }
@@ -270,6 +271,74 @@ class RecipeRepository {
       return null; // Return null if successful
     } catch (e) {
       return 'Failed to update recipe status: $e';
+    }
+  }
+
+  Future<String?> updateRecipe(
+    String recipeId,
+    String recipeTitle,
+    String description,
+    String ingredients,
+    String instructions,
+    int cookingTime,
+    String difficulty,
+    String videoTutorialLink, {
+    Uint8List? imageBytes,
+    XFile? imageFile,
+  }) async {
+    try {
+      String? imageUrl;
+      final currentUser = _firebaseAuth.currentUser;
+      if (currentUser == null) {
+        return 'User is not authenticated';
+      }
+
+      final String imagePath = 'recipe_images/${currentUser.uid}/$recipeId.jpg';
+
+      // Upload new image if provided
+      if (imageBytes != null) {
+        final uploadTask = await _firebaseStorage
+            .ref(imagePath)
+            .putData(imageBytes, SettableMetadata(contentType: 'image/jpeg'));
+        imageUrl = await uploadTask.ref.getDownloadURL();
+      } else if (imageFile != null) {
+        final uploadTask = await _firebaseStorage.ref(imagePath).putFile(
+            File(imageFile.path), SettableMetadata(contentType: 'image/jpeg'));
+        imageUrl = await uploadTask.ref.getDownloadURL();
+      }
+
+      // Create a map of fields to update
+      Map<String, dynamic> updateData = {
+        'recipeTitle': recipeTitle,
+        'description': description,
+        'ingredients': ingredients,
+        'instructions': instructions,
+        'cookingTime': cookingTime,
+        'difficulty': difficulty,
+        'videoTutorialLink': videoTutorialLink,
+        'status': 0 // Reset status to pending
+      };
+
+      // Only include 'image' if a new image URL was generated
+      if (imageUrl != null) {
+        updateData['image'] = imageUrl;
+      }
+
+      // Update the recipe in Firestore
+      await _firestore.collection('recipes').doc(recipeId).update(updateData);
+      return null; // Success
+    } catch (e) {
+      return 'Failed to update recipe: $e';
+    }
+  }
+
+  Future<String?> deleteRecipe(String recipeId) async {
+    try {
+      // Delete the recipe document from Firestore
+      await _firestore.collection('recipes').doc(recipeId).delete();
+      return null; // Success
+    } catch (e) {
+      return 'Failed to delete recipe: $e';
     }
   }
 }

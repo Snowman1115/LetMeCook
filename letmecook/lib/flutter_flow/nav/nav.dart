@@ -86,6 +86,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => UploadRecipePageWidget(),
         ),
         FFRoute(
+            name: 'modify_recipe_page',
+            path: '/modifyRecipePage/:id',
+            builder: (context, params) {
+              final recipeData = params.state.extra as Map<String, dynamic>?;
+              if (recipeData == null) {
+                return const Center(child: Text('No recipe data available'));
+              }
+              return ModifyRecipePageWidget(
+                recipeData: recipeData,
+              );
+            }),
+        FFRoute(
           name: 'pending_approval_recipe_page',
           path: '/pendingApprovalRecipePage',
           builder: (context, params) => PendingApprovalRecipePageWidget(),

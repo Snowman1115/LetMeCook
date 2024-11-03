@@ -8,6 +8,8 @@ export '/apply_as_verified_user_page/apply_as_verified_user_page_widget.dart'
     show ApplyAsVerifiedUserPageWidget;
 export '/upload_recipe_page/upload_recipe_page_widget.dart'
     show UploadRecipePageWidget;
+export '/modify_recipe_page/modify_recipe_page_widget.dart'
+    show ModifyRecipePageWidget;
 export '/pending_approval_recipe_page/pending_approval_recipe_page_widget.dart'
     show PendingApprovalRecipePageWidget;
 export '/display_pending_approval_recipe_page/display_pending_approval_recipe_page_widget.dart'

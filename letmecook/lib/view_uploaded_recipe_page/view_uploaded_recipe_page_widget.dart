@@ -37,12 +37,22 @@ class _ViewUploadedRecipePageWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => PendingApprovalRecipePageModel());
+    _fetchData();
+  }
+
+  // Method to initialize the Futures
+  void _fetchData() {
     _pendingRecipes =
         _recipeRepository.getRecipesByUsernameNStatus(0, widget.userData);
     _approvedRecipes =
         _recipeRepository.getRecipesByUsernameNStatus(1, widget.userData);
     _rejectedRecipes =
         _recipeRepository.getRecipesByUsernameNStatus(-1, widget.userData);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   @override
@@ -54,7 +64,7 @@ class _ViewUploadedRecipePageWidgetState
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3, // Set the number of tabs
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -94,13 +104,8 @@ class _ViewUploadedRecipePageWidgetState
         ),
         body: TabBarView(
           children: [
-            // Pending Tab Content
             _buildRecipeList(context, _pendingRecipes),
-
-            // Approved Tab Content
             _buildRecipeList(context, _approvedRecipes),
-
-            // Rejected Tab Content
             _buildRecipeList(context, _rejectedRecipes),
           ],
         ),
@@ -135,12 +140,13 @@ class _ViewUploadedRecipePageWidgetState
             itemBuilder: (context, index) {
               var recipe = snapshot.data![index];
               return InkWell(
-                onTap: () {
-                  context.pushNamed(
-                    'display_recipe_page',
+                onTap: () async {
+                  await context.pushNamed(
+                    'modify_recipe_page',
                     pathParameters: {'id': recipe['id']?.toString() ?? '0'},
                     extra: recipe,
                   );
+                  _fetchData();
                 },
                 child: Card(
                   color: Colors.white,
